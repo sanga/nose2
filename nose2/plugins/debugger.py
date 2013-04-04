@@ -11,7 +11,6 @@ prevent this plugin from launching pdb.
 
 """
 import logging
-import pdb
 
 from nose2 import events
 
@@ -22,24 +21,21 @@ log = logging.getLogger(__name__)
 
 class Debugger(events.Plugin):
 
-    """Enter pdb on test error or failure
+    """Enter debugger on test error or failure"""
 
-    .. attribute :: pdb
-
-       For ease of mocking and using different pdb implementations, pdb
-       is aliased as a class attribute.
-
-    """
     configSection = 'debugger'
-    commandLineSwitch = ('D', 'debugger', 'Enter pdb on test fail or error')
-    # allow easy mocking and replacment of pdb
-    pdb = pdb
+    commandLineSwitch = ('D', 'debugger', 'Enter debugger on test fail or error')
 
     def __init__(self):
+        self.dbg = __import__('pdb')
+        self.addArgument(self.overridedbg, None, 'debugger-to-use', 'use a debugger other than pdb (e.g. ipdb, pudb if they are installed)')
         self.errorsOnly = self.config.as_bool('errors-only', default=False)
 
+    def overridedbg(self, dbg):
+        self.dbg = __import__(dbg[0])
+
     def testOutcome(self, event):
-        """Drop into pdb on unexpected errors or failures"""
+        """Drop into debugger on unexpected errors or failures"""
         if not event.exc_info or event.expected:
             # skipped tests, unexpected successes, expected failures
             return
@@ -53,8 +49,8 @@ class Debugger(events.Plugin):
         try:
             if not result and evt.handled:
                 log.warning(
-                    "Skipping pdb for %s, user interaction not allowed", event)
+                    "Skipping debugger for %s, user interaction not allowed", event)
                 return
-            self.pdb.post_mortem(tb)
+            self.dbg.post_mortem(tb)
         finally:
             self.session.hooks.afterInteraction(evt)

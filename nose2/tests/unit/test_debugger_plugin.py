@@ -11,7 +11,7 @@ class NullHandler(logging.Handler):
         pass
 
 
-class StubPdb(object):
+class StubDbg(object):
 
     def __init__(self):
         self.called = False
@@ -49,38 +49,37 @@ class TestDebugger(TestCase):
                 assert False
         self.case = Test
 
-        self.pdb = self.plugin.pdb
-        self.plugin.pdb = StubPdb()
+        self.dbg = self.plugin.dbg = StubDbg()
 
         self.plugin.register()
 
         super(TestCase, self).setUp()
 
     def tearDown(self):
-        self.plugin.pdb = self.pdb
+        self.plugin.dbg = self.dbg
         super(TestCase, self).tearDown()
 
-    def test_does_not_call_pdb_on_success(self):
+    def test_does_not_call_dbg_on_success(self):
         test = self.case('test')
         test(self.result)
-        assert not self.plugin.pdb.called, "pdb was called on success"
+        assert not self.plugin.dbg.called, "dbg was called on success"
 
-    def test_does_call_pdb_on_error(self):
+    def test_does_call_dbg_on_error(self):
         test = self.case('test_err')
         test(self.result)
-        assert self.plugin.pdb.called, "pdb was not called on error"
+        assert self.plugin.dbg.called, "dbg was not called on error"
 
-    def test_does_call_pdb_on_failure(self):
+    def test_does_call_dbg_on_failure(self):
         test = self.case('test_fail')
         test(self.result)
-        assert self.plugin.pdb.called, "pdb was not called on failure"
+        assert self.plugin.dbg.called, "dbg was not called on failure"
 
-    def test_does_not_call_pdb_on_failure_if_config_set(self):
+    def test_does_not_call_dbg_on_failure_if_config_set(self):
         self.plugin.errorsOnly = True
         test = self.case('test_fail')
         test(self.result)
-        assert not self.plugin.pdb.called, \
-            "pdb was called on failure when errorsOnly set"
+        assert not self.plugin.dbg.called, \
+            "dbg was called on failure when errorsOnly set"
 
     def test_other_plugins_can_prevent_interaction(self):
         # prevent 'no logger for x' warnings
@@ -89,5 +88,5 @@ class TestDebugger(TestCase):
         nono.register()
         test = self.case('test_err')
         test(self.result)
-        assert not self.plugin.pdb.called, \
-            "pdb was called despite beforeInteraction returning False"
+        assert not self.plugin.dbg.called, \
+            "dbg was called despite beforeInteraction returning False"
