@@ -18,6 +18,11 @@ from nose2 import events
 __unittest = True
 log = logging.getLogger(__name__)
 
+def wrapped_import(mod):
+    # this is here for testability
+    # for tests we have to know which module has been imported
+    return __import__(mod), mod
+
 
 class Debugger(events.Plugin):
 
@@ -31,8 +36,13 @@ class Debugger(events.Plugin):
         self.addArgument(self.overridedbg, None, 'debugger-to-use', 'use a debugger other than pdb (e.g. ipdb, pudb if they are installed)')
         self.errorsOnly = self.config.as_bool('errors-only', default=False)
 
+    def importer(self, mod):
+        # this is here for testability, so we can hook this in tests and see what module was imported
+        print mod
+        return __import__(mod)
+
     def overridedbg(self, dbg):
-        self.dbg = __import__(dbg[0])
+        self.dbg = self.importer(dbg[0])
 
     def testOutcome(self, event):
         """Drop into debugger on unexpected errors or failures"""
