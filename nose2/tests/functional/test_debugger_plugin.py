@@ -3,7 +3,6 @@ from nose2.tests._common import FunctionalTestCase
 
 class LoggingDebugger(Debugger):
     def importer(self, mod):
-        print mod
         Debugger.importer(mod)
 
 Debugger = LoggingDebugger
@@ -13,7 +12,7 @@ class DebuggerPluginTestRuns(FunctionalTestCase):
         self.runIn('scenario/tests_in_package',
                   'pkg1.test.test_things.SomeTests.test_failed',
                   '-D',
-                  '--debugger-to-use=ipdb')
+                  '--debugger=ipdb')
 
     def test_defaults_to_pdb(self):
         self.runIn('scenario/tests_in_package',

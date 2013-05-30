@@ -29,16 +29,15 @@ class Debugger(events.Plugin):
     """Enter debugger on test error or failure"""
 
     configSection = 'debugger'
-    commandLineSwitch = ('D', 'debugger', 'Enter debugger on test fail or error')
+    commandLineSwitch = ('D', '', 'Enter debugger on test fail or error')
 
     def __init__(self):
         self.dbg = __import__('pdb')
-        self.addArgument(self.overridedbg, None, 'debugger-to-use', 'use a debugger other than pdb (e.g. ipdb, pudb if they are installed)')
+        self.addArgument(self.overridedbg, None, 'debugger', 'use a debugger other than pdb (e.g. ipdb, pudb if they are installed)')
         self.errorsOnly = self.config.as_bool('errors-only', default=False)
 
     def importer(self, mod):
         # this is here for testability, so we can hook this in tests and see what module was imported
-        print mod
         return __import__(mod)
 
     def overridedbg(self, dbg):
