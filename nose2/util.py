@@ -289,11 +289,17 @@ class _WritelnDecorator(object):
         return getattr(self.stream, attr)
 
     def write(self, arg):
-        self.stream.write(arg)
+        try:
+            self.stream.write(arg)
+        except UnicodeEncodeError:
+            self.stream.write('%s cant be encoded as ascii' % repr(arg))
 
     def writeln(self, arg=None):
         if arg:
-            self.stream.write(arg)
+            try:
+                self.stream.write(arg)
+            except UnicodeEncodeError:
+                self.stream.write('%s cant be encoded as ascii' % repr(arg))
         self.stream.write('\n')
                           # text-mode streams translate to \r\n if needed
 
